@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КАРМИОН — Калькулятор звезды</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&family=Tangerine:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B0E14;
+    --panel: #3E1522;
+    --panel-2: #2a0f19;
+    --gold: #C6A15B;
+    --gold-light: #E4CFA0;
+    --cream: #F3E9D6;
+    --karma: #D9455F;
+    --line: rgba(198,161,91,0.35);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(198,161,91,0.10), transparent 60%),
+      radial-gradient(900px 600px at 100% 10%, rgba(217,69,95,0.08), transparent 55%),
+      var(--bg);
+    color:var(--cream);
+    font-family:'Jost',sans-serif;
+    font-weight:300;
+    line-height:1.6;
+  }
+  h1,h2,h3,.serif{ font-family:'Cormorant Garamond', serif; }
+  .wordmark{
+    font-family:'Tangerine', cursive;
+    font-weight:700;
+    font-size:5rem;
+    color:var(--gold-light);
+    line-height:1;
+    letter-spacing:1px;
+  }
+  .wrap{ max-width:1000px; margin:0 auto; padding:0 24px; }
+  header.hero{ padding:72px 0 40px; text-align:center; }
+  .kicker{ text-transform:uppercase; letter-spacing:0.28em; font-size:0.72rem; color:var(--gold); margin-bottom:10px; }
+  .hero h1.wordmark{ margin:0 0 6px; }
+  .hero p.sub{ font-family:'Cormorant Garamond', serif; font-style:italic; font-size:1.35rem; color:var(--gold); margin:0 0 18px; }
+  .hero p.desc{ max-width:560px; margin:0 auto; color:var(--cream); opacity:0.85; font-size:0.98rem; }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:2px;
+  }
+
+  .form-card{ padding:32px; margin:32px 0 48px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:8px; }
+  .field label{ display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); margin-bottom:8px; }
+  .field select, .field input{
+    width:100%; padding:12px 10px; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--cream); font-family:'Jost',sans-serif; font-size:1rem; border-radius:2px;
+  }
+  .field select:focus, .field input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+  .hint{ font-size:0.8rem; color:var(--cream); opacity:0.55; margin-top:6px; }
+
+  button.primary{
+    margin-top:20px; width:100%; padding:16px; background:var(--gold); color:var(--bg);
+    border:none; font-family:'Jost',sans-serif; font-weight:600; letter-spacing:0.06em;
+    font-size:1rem; text-transform:uppercase; cursor:pointer; border-radius:2px;
+    transition:background .2s ease;
+  }
+  button.primary:hover{ background:var(--gold-light); }
+  button.secondary{
+    padding:12px 22px; background:transparent; color:var(--gold-light);
+    border:1px solid var(--gold); font-family:'Jost',sans-serif; font-size:0.9rem;
+    letter-spacing:0.05em; cursor:pointer; border-radius:2px;
+  }
+  button.secondary:hover{ background:rgba(198,161,91,0.12); }
+
+  #error-msg{ color:var(--karma); font-size:0.85rem; margin-top:10px; display:none; }
+
+  #results{ display:none; }
+
+  .star-section{ text-align:center; padding:20px 0 8px; }
+  .star-section h2{ font-size:2rem; margin-bottom:4px; }
+  .star-section .date-echo{ color:var(--gold); font-family:'Cormorant Garamond',serif; font-style:italic; margin-bottom:24px; }
+  svg#star{ width:100%; max-width:520px; height:auto; }
+  .star-num{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:46px; fill:#5170e8; }
+  .star-num-karma{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:30px; fill:var(--karma); }
+  .star-label{ font-family:'Jost',sans-serif; font-size:11px; fill:var(--gold); letter-spacing:0.05em; }
+  .star-line{ stroke:var(--line); stroke-width:1.4; fill:none; }
+
+  section.block{ margin:56px 0; }
+  section.block > h2{ font-size:1.7rem; color:var(--gold-light); border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:20px; }
+  section.block > p.lead{ opacity:0.85; margin-bottom:20px; font-size:0.95rem; }
+
+  .indicator-card{ padding:22px 26px; margin-bottom:16px; }
+  .indicator-card .row1{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .indicator-card h3{ margin:0; font-size:1.25rem; color:var(--gold-light); }
+  .indicator-card .num{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:2.1rem; color:var(--gold); }
+  .indicator-card .arcname{ font-size:0.8rem; color:var(--gold); opacity:0.85; text-transform:uppercase; letter-spacing:0.06em; }
+  .indicator-card .body{ margin-top:10px; font-size:0.95rem; color:var(--cream); opacity:0.92; }
+  .indicator-card .formula{ margin-top:10px; font-size:0.78rem; color:var(--cream); opacity:0.5; font-family:monospace; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width: 720px){
+    .grid2{ grid-template-columns:1fr; }
+    .form-grid{ grid-template-columns:1fr 1fr; }
+    .wordmark{ font-size:3.6rem; }
+  }
+
+  .tag{ display:inline-block; padding:3px 10px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; border-radius:20px; margin-right:6px; margin-bottom:6px; }
+  .tag-karma{ background:rgba(217,69,95,0.18); color:var(--karma); border:1px solid var(--karma); }
+  .tag-magic{ background:rgba(198,161,91,0.15); color:var(--gold-light); border:1px solid var(--gold); }
+  .tag-family{ background:rgba(228,207,160,0.1); color:var(--gold-light); border:1px solid var(--gold-light); }
+
+  .empty-note{ opacity:0.6; font-size:0.9rem; font-style:italic; }
+
+  .prognosis-form{ display:flex; gap:14px; align-items:end; flex-wrap:wrap; margin-bottom:24px; }
+  .prognosis-form .field{ flex:1; min-width:160px; }
+  .prognosis-result{ display:none; }
+  .prognosis-triad{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+  @media (max-width:720px){ .prognosis-triad{ grid-template-columns:1fr; } }
+  .prognosis-triad .pill{ text-align:center; padding:18px 10px; }
+  .prognosis-triad .pill .label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); margin-bottom:6px; }
+  .prognosis-triad .pill .val{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:2.4rem; color:var(--gold-light); }
+
+  footer{ text-align:center; padding:60px 0 40px; color:var(--gold); opacity:0.6; font-size:0.8rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">Авторская нумерологическая система</div>
+    <h1 class="wordmark">Кармион</h1>
+    <p class="sub">Калькулятор звезды судьбы</p>
+    <p class="desc">Введите дату рождения — калькулятор построит вашу звезду «Кармион»: шесть Лучей личности, кармические индикаторы прошлого воплощения и прогностику по методу «Луны и Солнца».</p>
+  </header>
+
+  <div class="card form-card">
+    <div class="form-grid">
+      <div class="field">
+        <label for="in-day">День</label>
+        <select id="in-day"></select>
+      </div>
+      <div class="field">
+        <label for="in-month">Месяц</label>
+        <select id="in-month">
+          <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
+          <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
+          <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
+          <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="in-year">Год</label>
+        <input type="number" id="in-year" min="1900" max="2100" placeholder="1994">
+      </div>
+    </div>
+    <div id="error-msg"></div>
+    <button class="primary" id="btn-calc">Построить звезду</button>
+  </div>
+
+  <div id="results">
+
+    <div class="star-section">
+      <h2 class="serif">Ваша звезда «Кармион»</h2>
+      <div class="date-echo" id="date-echo"></div>
+      <svg id="star" viewBox="0 0 520 560" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <section class="block">
+      <h2 class="serif">Родовая задача, СЖ и ОПВ</h2>
+      <p class="lead">Кармические индикаторы: месяц воплощения показывает родовую программу, СЖ — внутреннее сожаление из прошлой жизни, ОПВ — конкретную ошибку прошлого воплощения.</p>
+      <div id="karma-block"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="serif">Шесть Лучей личности</h2>
+      <p class="lead">Полная расшифровка каждого из шести ключевых показателей вашей матрицы.</p>
+      <div id="rays-block"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="serif">Классификация энергий</h2>
+      <p class="lead">Если среди ваших чисел встречаются кармические, магические или родовые арканы — вот что они означают.</p>
+      <div id="classification-block"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="serif">Связки векторов</h2>
+      <p class="lead">Значимые сочетания и повторы среди ваших шести Лучей.</p>
+      <div id="combos-block"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="serif">Прогностика: метод «Луны и Солнца»</h2>
+      <p class="lead">Рассчитайте энергию конкретного года своей жизни: внутренний план (Луна), внешний ресурс (Солнце) и итоговую тему года.</p>
+      <div class="prognosis-form">
+        <div class="field">
+          <label for="in-age">Возраст</label>
+          <input type="number" id="in-age" min="0" max="120">
+        </div>
+        <button class="secondary" id="btn-prognosis">Рассчитать прогноз</button>
+      </div>
+      <div class="prognosis-result" id="prognosis-result"></div>
+    </section>
+
+  </div>
+</div>
+
+<footer>КАРМИОН · Анастасия Цвиркунова (Щетинина)</footer>
+
+<script src="karmion_data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
